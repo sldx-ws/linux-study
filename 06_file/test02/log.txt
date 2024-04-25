@@ -1,3 +1,3 @@
-HELLO
-WORLD
-!
+hello world
+printf: open fd: 3
+sprintf: open fd: 3

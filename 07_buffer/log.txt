@@ -1,0 +1,7 @@
+write output
+printf output
+sprintf output
+fputs output
+printf output
+sprintf output
+fputs output

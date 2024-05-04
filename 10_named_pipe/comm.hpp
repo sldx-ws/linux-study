@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -12,18 +12,23 @@
 
 #define NAMED_PIPE "/tmp/mypipe.123"
 
-bool createFifo(const std::string &path) {
+bool createFifo(const std::string &path)
+{
     umask(0);
     int n = mkfifo(path.c_str(), 0600);
-    if (n == 0) {
-        return true;       
-    } else {
+    if (n == 0)
+    {
+        return true;
+    }
+    else
+    {
         std::cout << "errno: " << errno << "err string: " << strerror(errno) << std::endl;
         return false;
     }
 }
 
-void removeFifo(const std::string &path) {
+void removeFifo(const std::string &path)
+{
     int n = unlink(path.c_str());
     assert(n == 0);
     (void)n;

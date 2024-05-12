@@ -25,14 +25,21 @@ void handler(int signo)
     // 2、有非常多的子进程，同一时刻 部分 退出
     while (1)
     {
-        pid_t ret = waitpid(-1, NULL, 0);
+        // pid_t ret = waitpid(-1, NULL, 0); // 假设退出5个，第6个没退或者全退了，后续会阻塞式等待
+
+        pid_t ret = waitpid(-1, NULL, WNOHANG);
+        if (ret == 0) break;
     }
 
 }
 
 int main()
 {
-    signal(SIGCHLD, handler); // 在父进程中设置的，设置时没有子进程
+    // signal(SIGCHLD, handler); // 在父进程中设置的，设置时没有子进程
+
+    signal(SIGCHLD, SIG_IGN);
+    // signal(SIGCHLD, SIG_DFL);
+
     printf("我是父进程，pid: %d, ppid: %d\n", getpid(), getppid());
 
     pid_t id = fork();

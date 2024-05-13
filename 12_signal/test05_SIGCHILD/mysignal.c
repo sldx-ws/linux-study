@@ -35,7 +35,7 @@ void handler(int signo)
 
 int main()
 {
-    // signal(SIGCHLD, handler); // 在父进程中设置的，设置时没有子进程
+    // signal(SIGCHLD, handler); // 子进程退出时给父进程发送SIGCHILD信号
 
     signal(SIGCHLD, SIG_IGN);
     // signal(SIGCHLD, SIG_DFL);

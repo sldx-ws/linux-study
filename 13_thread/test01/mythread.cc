@@ -1,14 +1,16 @@
 #include <iostream>
+#include <assert.h>
 #include <string>
 #include <unistd.h>
 #include <pthread.h>
 
 using namespace std;
 
+// 新线程
 void *start_routine(void *args)
 {
-    string name = static_cast<const char *>(args);
-    while (1)
+    string name = static_cast<const char *>(args);  // 安全的进行强转
+    while (true)
     {
         cout << "new thread create success, name: " << name << endl;
         sleep(1);
@@ -18,9 +20,12 @@ void *start_routine(void *args)
 int main() 
 {
     pthread_t id;
-    pthread_create(&id, nullptr, start_routine, (void *)"thread one");
-
-    while (1)
+    int n = pthread_create(&id, nullptr, start_routine, (void *)"thread new");
+    assert(0 == n);
+    (void)n;
+    
+    // 主线程
+    while (true)
     {
         cout << "new thread create success, name: main thread" << endl;
         sleep(1);

@@ -31,11 +31,6 @@ key_t getKey()
 
 int getShmHelper(key_t k, int flags)
 {
-    // k 是要shmget，设置进入共享内存属性中的，用来表示
-    // 该共享内存，再内核中的唯一性
-
-    // shmid vs key
-    //   fd  vs inode
     int shmid = shmget(k, MAX_SIZE, flags);
     if (shmid < 0) 
     {

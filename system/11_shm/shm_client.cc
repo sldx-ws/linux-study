@@ -8,7 +8,7 @@ int main()
     printf("shmid: %d\n", shmid);  // shmid
     
     char *start = (char*)attachShm(shmid);
-    printf("attach success, addresss start: %p\n", start);
+    printf("attach success, address start: %p\n", start);
 
     const char *message = "hello server, 我是另一个进程，正在和你通信";
     pid_t id = getpid();

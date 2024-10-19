@@ -10,7 +10,7 @@ int main()
     // sleep(5);
 
     char *start = (char*)attachShm(shmid);
-    printf("attach success, addresss start: %p\n", start);
+    printf("attach success, address start: %p\n", start);
 
     // 使用
     while (1)

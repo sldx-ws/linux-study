@@ -1,4 +1,4 @@
-cc=g++
+cc = g++
 
 .PHONY:all
 all:udpClient udpServer

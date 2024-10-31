@@ -27,8 +27,8 @@ public:
 class Thread
 {
 public:
-    // typedef std::function<void *(void *)> _funct;
-    using func_t = std::function<void* (void*)>;
+    // typedef std::function<void*(void *)> _funct;
+    using func_t = std::function<void*(void*)>;
     const int num = 1024;
 
 public:
@@ -57,7 +57,7 @@ public:
     }
 
 private:
-    static void *start_routine(void *args)  // 类内成员，有缺省参数
+    static void *start_routine(void *args)
     {
         Context *ctx = static_cast<Context *>(args);
         void *ret = ctx->_this->run(ctx->_args);

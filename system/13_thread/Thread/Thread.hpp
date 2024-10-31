@@ -13,16 +13,15 @@ class Thread;
 // 当成一个大号的结构体
 class Context
 {
-public: 
-    Thread *_this;
-    void *_args;
 public:
     Context()
         : _this(nullptr)
         , _args(nullptr)
     {}
 
-    ~Context() {}
+public: 
+    Thread *_this;
+    void *_args;
 };
 
 class Thread
@@ -33,15 +32,10 @@ public:
     const int num = 1024;
 
 public:
-    // Thread() = default;
-
     Thread(func_t func, void *args = nullptr, int number = 0)
         : _func(func)
         , _args(args)
     {
-        // _name = "thread-";
-        // _name += std::to_string(number);
-
         char buffer[num];
         snprintf(buffer, sizeof buffer, "thread-%d", number);
         _name = buffer;
@@ -72,14 +66,10 @@ private:
         return ret;
 
         // 静态方法不能调用成员方法或者成员变量
-        // return _func(_args);
-
+        // return _func(_args);  // err
     }
 
-    void *run(void *args)
-    {
-        return _func(args);
-    }
+    void *run(void *args) { return _func(args); }
 
 private:
     std::string _name;

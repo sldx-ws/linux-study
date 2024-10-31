@@ -29,7 +29,6 @@ public:
             pthread_cond_wait(&_producer_cond, &_mutex);
         }
 
-        pthread_cond_signal(&_consumer_cond);
         _q.push(in);
 
         pthread_cond_signal(&_consumer_cond);

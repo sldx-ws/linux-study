@@ -4,7 +4,6 @@
 #include <vector>
 #include <unistd.h>
 #include <pthread.h>
-
 using namespace std;
 
 // 当成结构体使用
@@ -13,7 +12,7 @@ class ThreadData
 public:
     int number;
     pthread_t tid;
-    char namebuffer[64];
+    char nameBuffer[64];
 };
 
 class ThreadReturn
@@ -23,14 +22,13 @@ public:
     int exit_result;
 };
 
-// 新线程
 void *start_routine(void *args)
 {
-    ThreadData *td = static_cast<ThreadData *>(args);  // 安全的进行强转
+    ThreadData *td = static_cast<ThreadData *>(args);
     int cnt = 10;
     while (cnt)
     {
-        cout << "new thread create success, name: " << td->namebuffer << " cnt: " << cnt-- << endl;
+        cout << "new thread create success, name: " << td->nameBuffer << " cnt: " << cnt-- << endl;
         sleep(1);
     }
     // return nullptr;
@@ -49,21 +47,20 @@ void *start_routine(void *args)
 
 int main() 
 {
-    // 1. 创建一批线程
     vector<ThreadData *> threads;
 #define NUM 10
     for (int i = 0; i < NUM; ++i)
     {
         ThreadData *td = new ThreadData();
         td->number = i + 1;
-        snprintf(td->namebuffer, sizeof(td->namebuffer), "%s:%d", "thread", i + 1);
+        snprintf(td->nameBuffer, sizeof(td->nameBuffer), "%s:%d", "thread", i + 1);
         pthread_create(&td->tid, nullptr, start_routine, td);
         threads.push_back(td);
     }
 
     for (auto &iter : threads)
     {
-        cout << "create thread: " << iter->namebuffer << " : " << iter->tid << " success" << endl;
+        cout << "create thread: " << iter->nameBuffer << " : " << iter->tid << " success" << endl;
     }
 
     // 线程可以被 cancel ，注意：线程要被取消，前提是这个线程已经跑起来了
@@ -72,7 +69,7 @@ int main()
     for (int i = 0; i < threads.size() / 2; ++i)
     {
         pthread_cancel(threads[i]->tid);
-        cout << "pthread_cancel : " << threads[i]->namebuffer << "success" << endl;
+        cout << "pthread_cancel : " << threads[i]->nameBuffer << "success" << endl;
     }
 
     for (auto &iter : threads)
@@ -80,13 +77,13 @@ int main()
         void *ret = nullptr; // 注意：void*
         int n = pthread_join(iter->tid, &ret); // void **, *retp = return (void*)td->number
         assert(0 == n);
-        cout << "join : " << iter->namebuffer << "success, exit_code: " << (long long)ret << endl; // void* 8B -> long long 8B
+        cout << "join : " << iter->nameBuffer << "success, exit_code: " << (long long)ret << endl; // void* 8B -> long long 8B
 
         // ThreadReturn *ret = nullptr;
         // // pthread_join: 默认认为函数会调用成功！不考虑异常问题，异常问题是进程该考虑的问题
         // int n = pthread_join(iter->tid, (void **)&ret); // void **, *retp = return (void*)td->number
         // assert(0 == n);
-        // cout << "join : " << iter->namebuffer << "success, exit_code: " << ret->exit_code << ", exit_result:  " << ret->exit_result << endl; // void* 8B -> long long 8B
+        // cout << "join : " << iter->nameBuffer << "success, exit_code: " << ret->exit_code << ", exit_result:  " << ret->exit_result << endl; // void* 8B -> long long 8B
 
         delete iter;
     }

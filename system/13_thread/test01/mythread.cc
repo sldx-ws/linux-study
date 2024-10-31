@@ -3,13 +3,11 @@
 #include <string>
 #include <unistd.h>
 #include <pthread.h>
-
 using namespace std;
 
-// 新线程
 void *start_routine(void *args)
 {
-    string name = static_cast<const char *>(args);  // 安全的进行强转
+    string name = static_cast<const char *>(args)
     while (true)
     {
         cout << "new thread create success, name: " << name << endl;

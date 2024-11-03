@@ -10,8 +10,8 @@ namespace thread_pool
 
 class Thread
 {
-public:
     using func_t = std::function<void*(void*)>;
+public:
     const int num = 1024;
 
 public:

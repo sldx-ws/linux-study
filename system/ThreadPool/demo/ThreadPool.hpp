@@ -36,7 +36,7 @@ public:
         }
     }
 
-    void Push(T& t)
+    void push(T& t)
     {
         pthread_mutex_lock(&_mutex);
         _task_queue.push(t);
@@ -58,15 +58,18 @@ private:
     static void* handler_task(void* args)
     {
         ThreadPool<T>* _this = static_cast<ThreadPool<T>*>(args);
-        _this->queueLock();
-        while (_this->queueIsEmpty())
+        while (true)
         {
-            _this->threadWait();
-        }
+            _this->queueLock();
+            while (_this->queueIsEmpty())
+            {
+                _this->threadWait();
+            }
 
-        T task = _this->queuePop(); // 将task从taskQueue中拿到当前thread独立的栈中
-        _this->queueUnlock();
-        task(); // 先解锁，再执行task
+            T task = _this->queuePop(); // 将task从taskQueue中拿到当前thread独立的栈中
+            _this->queueUnlock();
+            task(); // 先解锁，再执行task
+        }
 
         pthread_exit(nullptr);
     }

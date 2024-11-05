@@ -6,7 +6,7 @@ all:tcpClient tcpServer
 tcpClient:tcpClient.cc
 	$(cc) -o $@ $^ -std=c++11
 tcpServer:tcpServer.cc
-	$(cc) -o $@ $^ -std=c++11
+	$(cc) -o $@ $^ -std=c++11 -DTOY
 
 .PHONY:clean
 clean:

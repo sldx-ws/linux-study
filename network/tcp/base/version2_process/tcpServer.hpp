@@ -3,11 +3,13 @@
 #include <iostream>
 #include <string>
 #include <cstring>      // memset
-#include <sys/types.h>  // socket bind listen accept
+#include <cstdlib>      // exit
+#include <sys/wait.h>   // wait
+#include <sys/types.h>  // socket bind listen accept wait
 #include <sys/socket.h> // socket bind listen accept
 #include <arpa/inet.h>  // struct sockaddr_in
 #include <unistd.h>     // read
-
+#include <signal.h>
 namespace Server
 {
 
@@ -65,6 +67,11 @@ public:
 
     void start()
     {
+
+#ifdef PROCESS2
+        signal(SIGCHLD, SIG_IGN);
+#endif
+
         char buffer[1024];
         for (;;)
         {
@@ -80,8 +87,43 @@ public:
             logMessage(ERROR, "accept a new link success");  // ?
             cout << "sock: " << sock << endl;
 
-            serviceIO(sock);
-            close(sock);
+            // version2: 多进程版
+#ifdef PROCESS1
+            
+            pid_t id = fork();
+            if (0 == id)
+            {
+                close(_listenSock);  // 子进程关闭不影响父进程
+
+                if (fork() > 0)
+                    exit(0);
+                
+                serviceIO(sock);
+                close(sock);
+
+                exit(0);
+            }
+
+            close(sock);  // 父进程必须关
+            pid_t ret = waitpid(id, nullptr, 0);
+            if (ret > 0)
+            {
+                cout << "wait success: " << ret << endl;
+            }
+#elif PROCESS2  
+            pid_t id = fork();
+            if (0 == id)
+            {
+                close(_listenSock);
+
+                serviceIO(sock);
+                close(sock);
+
+                exit(0);
+            }
+
+            close(sock);  // 父进程必须关
+#endif  // #ifdef PROCESS1
         }
     }
 
@@ -109,8 +151,6 @@ public:
             }
         }
     }
-
-    ~tcpServer() = default;
 
 private:
     int _listenSock;

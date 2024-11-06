@@ -48,7 +48,7 @@ public:
     {
 #ifdef THREAD_POOL
         ThreadPool<Task>::getInstance()->run();
-
+        logMessage(NORMAL, "Thread init success");
 #endif
         _listenSock = socket(AF_INET, SOCK_STREAM, 0);
         if (_listenSock < 0)
@@ -56,7 +56,7 @@ public:
             logMessage(FATAL, "create socket error");
             exit(SOCKET_ERR);
         }
-        logMessage(NORMAL, "create socket success");  // ?
+        logMessage(NORMAL, "create socket success: %d", _listenSock);
 
         struct sockaddr_in local;
         memset(&local, 0, sizeof local);
@@ -65,10 +65,10 @@ public:
         local.sin_addr.s_addr = INADDR_ANY;
         if (bind(_listenSock, (struct sockaddr*)&local, sizeof local) < 0)
         {
-            logMessage(FATAL, "create socket error");
+            logMessage(FATAL, "bind socket error");
             exit(BIND_ERR);
         }
-        logMessage(NORMAL, "create socket success");
+        logMessage(NORMAL, "bind socket success");
 
         if (listen(_listenSock, G_BACKLOG) < 0)
         {
@@ -92,7 +92,7 @@ public:
                 logMessage(ERROR, "accept error, next");
                 continue;
             }
-            logMessage(ERROR, "accept a new link success");  // ?
+            logMessage(NORMAL, "accept a new link success, get new sock: %d", sock);
             cout << "sock: " << sock << endl;
 
             // version4: 线程池版

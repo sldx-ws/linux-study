@@ -1,4 +1,5 @@
 #include "tcpServer.hpp"
+#include "daemon.hpp"
 #include <memory>
 using namespace Server;
 
@@ -18,6 +19,8 @@ int main(int argc, char *argv[])
 
     unique_ptr<tcpServer> tcs(new tcpServer(serverPort));
     tcs->initServer();
+
+    daemonSelf();
     tcs->start();
 
     return 0;

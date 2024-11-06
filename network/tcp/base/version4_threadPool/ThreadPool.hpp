@@ -1,6 +1,7 @@
 #pragma once
 #include "Thread.hpp"
 #include "LockGuard.hpp"
+#include "log.hpp"
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -52,7 +53,7 @@ public:
             ThreadData<TaskType>* td = new ThreadData<TaskType>(this, t->threadName());
 
             t->start(handler_task, td);
-            std::cout << t->threadName() << " run..." << std::endl;
+            logMessage(DEBUG, "%s start ...", t->threadName().c_str());
         }
     }
 

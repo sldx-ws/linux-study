@@ -10,4 +10,4 @@ tcpServer:tcpServer.cc
 
 .PHONY:clean
 clean:
-	rm -f tcpClient tcpServer
+	rm -f tcpClient tcpServer log.txt log.error

@@ -46,10 +46,6 @@ public:
 
     void initServer()
     {
-#ifdef THREAD_POOL
-        ThreadPool<Task>::getInstance()->run();
-        logMessage(NORMAL, "Thread init success");
-#endif
         _listenSock = socket(AF_INET, SOCK_STREAM, 0);
         if (_listenSock < 0)
         {
@@ -80,6 +76,10 @@ public:
 
     void start()
     {
+#ifdef THREAD_POOL
+        ThreadPool<Task>::getInstance()->run();
+        logMessage(NORMAL, "Thread init success");
+#endif
         char buffer[1024];
         for (;;)
         {

@@ -21,21 +21,21 @@ void daemonSelf(const char* currPath = nullptr)
     assert(n != -1);
 
     // 3. 守护进程是脱离终端的，关闭或重定向进程默认打开的文件
-    // int fd = open(DEV, O_RDWR);
-    // if (fd >= 0)
-    // {
-    //     dup2(fd, 0);
-    //     dup2(fd, 1);
-    //     dup2(fd, 2);
+    int fd = open(DEV, O_RDWR);
+    if (fd >= 0)
+    {
+        dup2(fd, 0);
+        dup2(fd, 1);
+        dup2(fd, 2);
 
-    //     close(fd);
-    // }
-    // else
-    // {
-    //     close(0);
-    //     close(1);
-    //     close(2);
-    // }
+        close(fd);
+    }
+    else
+    {
+        close(0);
+        close(1);
+        close(2);
+    }
 
     // 4. 可选：进程执行路径发生更改
     if (currPath) chdir(currPath);

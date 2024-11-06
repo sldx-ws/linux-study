@@ -50,10 +50,10 @@ public:
         local.sin_addr.s_addr = INADDR_ANY;
         if (bind(_listenSock, (struct sockaddr*)&local, sizeof local) < 0)
         {
-            logMessage(FATAL, "create socket error");
+            logMessage(FATAL, "bind socket error");
             exit(BIND_ERR);
         }
-        logMessage(NORMAL, "create socket success");
+        logMessage(NORMAL, "bind socket success");
 
         if (listen(_listenSock, G_BACKLOG) < 0)
         {
@@ -77,7 +77,7 @@ public:
                 logMessage(ERROR, "accept error, next");
                 continue;
             }
-            logMessage(ERROR, "accept a new link success");  // ?
+            logMessage(NORMAL, "accept a new link success");  // ?
             cout << "sock: " << sock << endl;
 
             // version1: 婴儿版

@@ -1,15 +1,16 @@
 #pragma once
-#include "log.hpp"
 #include <iostream>
 #include <string>
+#include <functional>
 #include <cstring>      // memset
 #include <cstdlib>      // exit
 #include <sys/wait.h>   // wait
-#include <sys/types.h>  // socket bind listen accept wait
-#include <sys/socket.h> // socket bind listen accept
+#include <sys/types.h>  // socket bind listen accept send wait
+#include <sys/socket.h> // socket bind listen accept send
 #include <arpa/inet.h>  // struct sockaddr_in
-#include <unistd.h>     // read
-#include <signal.h>
+#include "log.hpp"
+#include "protocol.hpp"
+
 namespace Server
 {
 
@@ -26,10 +27,54 @@ enum
 static const string defaultIp = "0.0.0.0";
 static const int G_BACKLOG = 5;
 
-class tcpServer
+// const Request& req: 输入型
+// Response& resp: 输出型
+using func_t = std::function<bool (const Request& req, Response& resp)>;
+
+// 解耦
+void handlerEnter(int sock, func_t func)
+{
+    static std::string inBuffer;
+    while (true)
+    {
+        // 1.读取: "content_len"\r\n"x op y"\r\n
+            // 保证读到的是 “一个” 完整的请求
+        std::string req_text, req_str;
+        if (!recvPackage(sock, inBuffer, &req_text)) return;
+        std::cout << "带报头的请求: \n" << req_text << std::endl;
+        if (!deLength(req_text, &req_str)) return;
+        std::cout << "去掉报头的正文: \n" << req_text << std::endl;
+
+        // 2.对请求Request，反序列化
+            // 得到一个结构化的请求对象
+        Request req;
+        if (!req.deserialize(req_str)) return;
+
+        // 3.计算处理 req.x req.op req.y  --- 业务逻辑
+            // 得到一个结构化的响应
+        Response resp;
+        func(req, resp);  // req的处理结果，放入resp
+
+        // 4.对响应Response，序列化
+            // 得到一个“字符串”
+        std::string resp_str;
+        resp.serialize(&resp_str);
+
+        std::cout << "计算完成，序列化响应: " << resp_str << std::endl; 
+
+        // 5.最后发送响应
+            // 构建成为一个完整的报文
+        std::string send_string = enLength(resp_str);
+        std::cout << "构建完成完整的响应\n" << send_string << std::endl; 
+
+        send(sock, send_string.c_str(), send_string.size(), 0);
+    }
+}
+
+class CalServer
 {
 public:
-    tcpServer(uint16_t port, string ip = defaultIp)
+    CalServer(uint16_t port, string ip = defaultIp)
         : _listenSock(-1)
         , _port(port)
         , _ip(ip)
@@ -43,7 +88,7 @@ public:
             logMessage(FATAL, "create socket error");
             exit(SOCKET_ERR);
         }
-        logMessage(NORMAL, "create socket success");  // ?
+        logMessage(NORMAL, "create socket success: %d", _listenSock);
 
         struct sockaddr_in local;
         memset(&local, 0, sizeof local);
@@ -65,13 +110,8 @@ public:
         logMessage(NORMAL, "listen socket success");
     }
 
-    void start()
+    void start(func_t func)
     {
-
-#ifdef PROCESS2
-        signal(SIGCHLD, SIG_IGN);
-#endif
-
         char buffer[1024];
         for (;;)
         {
@@ -84,21 +124,15 @@ public:
                 logMessage(ERROR, "accept error, next");
                 continue;
             }
-            logMessage(NORMAL, "accept a new link success");  // ?
+            logMessage(NORMAL, "accept a new link success, get new sock: %d", sock);
             cout << "sock: " << sock << endl;
 
-            // version2: 多进程版
-#ifdef PROCESS1
-            
             pid_t id = fork();
             if (0 == id)
             {
                 close(_listenSock);  // 子进程关闭不影响父进程
-
-                if (fork() > 0)
-                    exit(0);
                 
-                serviceIO(sock);
+                handlerEnter(sock, func);
                 close(sock);
 
                 exit(0);
@@ -108,46 +142,7 @@ public:
             pid_t ret = waitpid(id, nullptr, 0);
             if (ret > 0)
             {
-                cout << "wait success: " << ret << endl;
-            }
-#elif PROCESS2  
-            pid_t id = fork();
-            if (0 == id)
-            {
-                close(_listenSock);
-
-                serviceIO(sock);
-                close(sock);
-
-                exit(0);
-            }
-
-            close(sock);  // 父进程必须关
-#endif
-        }
-    }
-
-    void serviceIO(int sock)
-    {
-        char buffer[1024];
-        while (true)
-        {
-            ssize_t n = read(sock, buffer, sizeof(buffer) - 1);
-            if (n > 0)
-            {
-                buffer[n] = 0;
-                cout << "recv message: " << buffer << endl;
-
-                string outBuffer = buffer;
-                outBuffer += " server[echo]";
-
-                write(sock, outBuffer.c_str(), outBuffer.size());  // 多路转接
-            }
-            else if ( 0 == n )
-            {
-                // 代表client退出
-                logMessage(NORMAL, "client quit, me too!");
-                break;
+                logMessage(NORMAL, "wait child success");
             }
         }
     }

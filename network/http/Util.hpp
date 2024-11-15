@@ -1,6 +1,7 @@
 #pragma once 
 #include <iostream>
 #include <string>
+#include <fstream>
 
 class Util
 {
@@ -14,5 +15,20 @@ public:
         buffer.erase(0, sub.size() + sep.size());
 
         return sub;
+    }
+
+    static bool readFile(const std::string recourse, std::string* out)
+    {
+        std::ifstream in(recourse);
+        if (!in.is_open()) return false;  // resource not found
+        
+        std::string line;
+        while (std::getline(in, line))
+        {
+            *out += line;
+        }
+
+        in.close();
+        return true;
     }
 };
